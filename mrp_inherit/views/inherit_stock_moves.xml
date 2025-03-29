@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="inherit_view_move_line_tree" model="ir.ui.view">
+            <field name="name">inherit_view_move_line_tree</field>
+            <field name="model">stock.move.line</field>
+            <field name="inherit_id" ref="stock.view_move_line_tree"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <field name="quantity" position="after">
+                    <field name="quantity_product_uom" decoration-success="(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit'))"/>
+                    <field name="x_quantity_free" optional="hide" decoration-success="(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit'))"/>
+                    <field name="x_quantity_used" decoration-danger="(location_usage in ('internal','transit')) and (location_dest_usage not in ('internal','transit'))" />
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>
