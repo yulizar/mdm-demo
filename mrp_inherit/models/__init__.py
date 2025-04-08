@@ -2,3 +2,4 @@
 
 from . import models
 from . import stock_move_line_inherit
+from . import mrp_inherit
