@@ -4,8 +4,8 @@ from odoo import fields, models, api
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'
 
-    x_quantity_free = fields.Float(string="Quantity ", compute="_compute_x_quantity", store=True, default=0.0)
-    x_quantity_used = fields.Float(string="Quantity Used", compute="_compute_x_quantity", store=True, default=0.0)
+    x_quantity_free = fields.Float(string="Quantity ", compute="_compute_x_quantity", store=True, default=0.0, index=True)
+    x_quantity_used = fields.Float(string="Quantity Used", compute="_compute_x_quantity", store=True, default=0.0, index=True)
 
     @api.depends('quantity','location_usage', 'location_dest_usage')
     def _compute_x_quantity(self):
