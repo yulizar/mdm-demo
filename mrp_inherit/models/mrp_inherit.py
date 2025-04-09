@@ -32,9 +32,13 @@ class MrpProduction(models.Model):
                             'qty_remaining': wc_capacity,
                             'date_start': date_start,
                             'date_finished': date_finished,
+                            'duration_expected': wo.workcenter_id.resource_calendar_id.hours_per_day * 60
                         })
 
-                    wo.update({ 'qty_remaining':remainder_wo })
+                    wo.update({
+                        'qty_remaining':remainder_wo,
+                        'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
+                    })
                 else:
                     for _ in range(int(split_wo_count-1)):
                         date_start = date_start + timedelta(days=1)
@@ -44,9 +48,13 @@ class MrpProduction(models.Model):
                             'qty_remaining': wc_capacity,
                             'date_start': date_start,
                             'date_finished': date_finished,
+                            'duration_expected': wo.workcenter_id.resource_calendar_id.hours_per_day * 60
                         })
 
-                    wo.update({'qty_remaining': wc_capacity})
+                    wo.update({
+                        'qty_remaining': wc_capacity,
+                        'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
+                    })
 
         return res
 
