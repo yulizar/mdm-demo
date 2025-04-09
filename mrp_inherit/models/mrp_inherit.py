@@ -17,6 +17,7 @@ class MrpProduction(models.Model):
         if res.workorder_ids:
             for wo in res.workorder_ids:
                 wc_capacity = wo.workcenter_id.default_capacity
+                wc_capacity = wc_capacity * wo.workcenter_id.resource_calendar_id.hours_per_day
                 split_wo_count = wo.qty_remaining // wc_capacity
                 remainder_wo = wo.qty_remaining % wc_capacity
                 print(remainder_wo)
