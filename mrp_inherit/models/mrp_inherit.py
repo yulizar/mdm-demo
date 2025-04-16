@@ -72,6 +72,8 @@ class MrpProduction(models.Model):
 
                         for comp in new_wo.move_raw_ids:
                             comp.date = date_start_user
+                            for ml in comp:
+                                ml.date = date_start_user
 
                     wo.update({
                         'qty_remaining': wc_capacity,
@@ -81,6 +83,9 @@ class MrpProduction(models.Model):
                     # wo._compute_duration_expected()
                     for comp in wo.move_raw_ids:
                         comp.date = date_start_user
+
+                        for ml in comp:
+                            ml.date = date_start_user
 
         return res
 
