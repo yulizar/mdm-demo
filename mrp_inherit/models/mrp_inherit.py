@@ -34,7 +34,6 @@ class MrpProduction(models.Model):
                 wc_capacity = wc_capacity * wo.workcenter_id.resource_calendar_id.hours_per_day
                 split_wo_count = wo.qty_remaining // wc_capacity
                 remainder_wo = wo.qty_remaining % wc_capacity
-
                 wo._compute_duration_expected()
                 date_start = wo.date_start
 
@@ -51,11 +50,24 @@ class MrpProduction(models.Model):
                         })
                         new_wo._compute_duration_expected()
 
+                        for comp in new_wo.move_raw_ids:
+                            comp.date = date_start_user
+                            for ml in comp:
+                                print(ml.date)
+                                ml.sudo().write({'date': date_start_user})
+                                print(ml.date)
+
                     wo.update({
                         'qty_remaining':remainder_wo,
                         'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
                     })
                     wo.date_finished = wo.date_start + relativedelta(minutes = wo.duration_expected)
+                    for comp in wo.move_raw_ids:
+                        comp.date = date_start_user
+                        for ml in comp:
+                            print(ml.date)
+                            ml.sudo().write({'date': date_start_user})
+                            print(ml.date)
 
                 else:
                     for _ in range(int(split_wo_count-1)):
@@ -73,19 +85,22 @@ class MrpProduction(models.Model):
                         for comp in new_wo.move_raw_ids:
                             comp.date = date_start_user
                             for ml in comp:
-                                ml.date = date_start_user
+                                print(ml.date)
+                                ml.sudo().write({'date': date_start_user})
+                                print(ml.date)
 
                     wo.update({
                         'qty_remaining': wc_capacity,
                         'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
                     })
                     wo.date_finished = wo.date_start + relativedelta(minutes=wo.duration_expected)
-                    # wo._compute_duration_expected()
                     for comp in wo.move_raw_ids:
                         comp.date = date_start_user
-
                         for ml in comp:
-                            ml.date = date_start_user
+                            print(ml.date)
+                            ml.sudo().write({'date': date_start_user})
+                            print(ml.date)
+                    # wo._compute_duration_expected()
 
         return res
 
@@ -99,7 +114,7 @@ class MrpProduction(models.Model):
             for move in production.move_raw_ids:
                 for ml in move:
                     print(ml.reference, ml.date)
-                    ml.update({
+                    ml.write({
                         'date': production.date_start
                     })
                     print(ml.date)
@@ -141,3 +156,8 @@ class MrpWorkorder(models.Model):
     #     for old_wo, new_wo in zip(self, new_wos):
     #         if old_wo.move_raw_ids:
     #             operations_mapping = {}
+
+class StockMoveLine(models.Model):
+    _inherit = 'stock.move.line'
+
+    date = fields.Datetime(related='move_id.date')
