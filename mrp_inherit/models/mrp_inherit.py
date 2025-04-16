@@ -70,12 +70,17 @@ class MrpProduction(models.Model):
                         })
                         new_wo._compute_duration_expected()
 
+                        for comp in new_wo.move_raw_ids:
+                            comp.date = date_start_user
+
                     wo.update({
                         'qty_remaining': wc_capacity,
                         'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
                     })
                     wo.date_finished = wo.date_start + relativedelta(minutes=wo.duration_expected)
                     # wo._compute_duration_expected()
+                    for comp in wo.move_raw_ids:
+                        comp.date = date_start_user
 
         return res
 
