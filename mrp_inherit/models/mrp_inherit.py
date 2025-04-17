@@ -22,6 +22,8 @@ class MrpProduction(models.Model):
 
         if res.move_raw_ids:
             res.action_confirm()
+            # raise UserWarning(_("ASD"))
+            res._change_move_line_date()
             res.button_plan()
             res.action_start()
             res.update({'date_start': date_start_user})
@@ -45,8 +47,8 @@ class MrpProduction(models.Model):
                         new_wo.update({
                             'qty_remaining': wc_capacity,
                             'date_start': date_start,
-                            # 'date_finished': date_finished,
-                            'duration_expected': wo.workcenter_id.resource_calendar_id.hours_per_day * 60
+                            'date_finished': date_start + timedelta(hours=wo.workcenter_id.resource_calendar_id.hours_per_day),
+                            # 'duration_expected': wo.workcenter_id.resource_calendar_id.hours_per_day * 60
                         })
                         new_wo._compute_duration_expected()
 
@@ -59,7 +61,7 @@ class MrpProduction(models.Model):
 
                     wo.update({
                         'qty_remaining':remainder_wo,
-                        'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
+                        # 'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
                     })
                     wo.date_finished = wo.date_start + relativedelta(minutes = wo.duration_expected)
                     for comp in wo.move_raw_ids:
@@ -77,8 +79,8 @@ class MrpProduction(models.Model):
                         new_wo.update({
                             'qty_remaining': wc_capacity,
                             'date_start': date_start,
-                            # 'date_finished': date_finished,
-                            'duration_expected': wo.workcenter_id.resource_calendar_id.hours_per_day * 60
+                            'date_finished': date_start + timedelta(hours=wo.workcenter_id.resource_calendar_id.hours_per_day),
+                            # 'duration_expected': wo.workcenter_id.resource_calendar_id.hours_per_day * 60
                         })
                         new_wo._compute_duration_expected()
 
@@ -91,9 +93,10 @@ class MrpProduction(models.Model):
 
                     wo.update({
                         'qty_remaining': wc_capacity,
-                        'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
+                        # 'duration_expected': float_round((remainder_wo / wc_capacity) *  wo.workcenter_id.resource_calendar_id.hours_per_day * 60, precision_digits=0, rounding_method='HALF-UP')
                     })
-                    wo.date_finished = wo.date_start + relativedelta(minutes=wo.duration_expected)
+                    wo.date_finished = wo.date_start + relativedelta(minutes=wo.workcenter_id.resource_calendar_id.hours_per_day)
+                    res.date_finished = res.date_start + timedelta(hours=wo.workcenter_id.resource_calendar_id.hours_per_day) + timedelta(days=int(split_wo_count))
                     for comp in wo.move_raw_ids:
                         comp.date = date_start_user
                         for ml in comp:
@@ -155,7 +158,24 @@ class MrpWorkorder(models.Model):
     #
     #     for old_wo, new_wo in zip(self, new_wos):
     #         if old_wo.move_raw_ids:
-    #             operations_mapping = {}
+    #             move_raw_mapping = {}
+    #             move_vals = old_wo.raw_material_production_id._extract_records()
+    #             for original, copied in zip(old_wo.move_raw_ids, new_wo.move_raw_ids.sorted()):
+    #                 move_raw_mapping[original] = copied
+    #             new_move = self.env['stock.move'].create({
+    #                 '':''
+    #             })
+
+    # @api.model_create_multi
+    # def create(self, vals):
+    #     result = super(MrpWorkorder, self).create(vals)
+    #
+    #     if not result._context.get('from_copy') and len(result.move_raw_ids) > 1:
+    #         for record in result.move_raw_ids:
+    #             result.with_context({'from_copy': True}).copy({
+    #                 'move_raw_ids': [(4, record.id)]
+    #             })
+    #     return result
 
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'
